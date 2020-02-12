@@ -3,7 +3,6 @@ import glob
 import string
 import re
 import nltk
-from nltk.corpus import sentiwordnet as swn
 
 """
 review class acts as a node, holds all data
@@ -42,28 +41,25 @@ has a list of reviews
 """
 
 class folder_reader:
-    def __init__(self, reviews):
+    def __init__(self, reviews, good_words, bad_words, negations):
         self.reviews = reviews
+        self.good_words = good_words
+        self.bad_words = bad_words
+        self.negations = negations
+
 
     def make_review(self, p, n, e, w):
         rev = review(p,n,e,w)
         return rev
 
-    def convert_pos(tag):
-        if tag.startswith('J'):
-            return "a"
-        elif tag.startswith('N'):
-            return "n"
-        elif tag.startswith('R'):
-            return "r"
-        elif tag.startswith('V'):
-            return "v"
-        return None
-
-    def get_sentiment(word,tag):
-        tag = self.convert_pos(tag)
-        sentis = swn.senti_synsets(word, tag)[0]
-        return [sentis.pos_score(),sentis.neg_score()]
+    def is_negated(self,line,word):
+        for i in range(len(line)-1):
+            if(line[i+1] == word) and (line[i] in negations):
+                return True
+            elif(i+2 < len(line) -1) and (line[i+2] == word) and(line[i] in negations):
+                return True
+            else:
+                return False
 
     def read_folder(self):
         exclamation = string.punctuation[0]
@@ -78,33 +74,34 @@ class folder_reader:
             f = open(file)
             for line in f:
                 #look for exclamation pt
-                if exclamation in line:
+                if exc:
+                    continue
+                elif exclamation in line and exc == False:
                     exc = True
-                #get negative an positive sentiment values
-                token = nltk.word_tokenize(line)
-                tagged = nltk.pos_tag(token)
-                for x,y in tagged:
-                    print(x)
-                    print(y)
-                    print("------")
-                senti_val = [self.get_sentiment(x,y) for x,y in tagged]
-                for sent in senti_val:
-                    if len(sent) > 0:
-                        print(sent[0])
-                        print(sent[1])
-                        pos += sent[0]
-                        neg += sent[1]
                 #get length of sentence
                 line = re.sub(r'[^\w\s]','',line)
+                line = line.split()
                 wrds += len(line)
+                #get number of positive and negative words
+                for word in line:
+                    if word in good_words and self.is_negated(line,word):
+                        neg +=1
+                    elif word in good_words and not(self.is_negated(line,word)):
+                        pos +=1
+                    elif word in bad_words and self.is_negated(line,word):
+                        pos +=1
+                    elif word in bad_words and not(self.is_negated(line,word)):
+                        neg+=1
 
-            print(pos)
-            print(neg)
-            print(exc)
-            print(wrds)
+            review r = review(pos,neg,exc,wrds)
+            reviews.append(r)
 
 
-
-
-FR = folder_reader([])
+bad = open("negative-words.txt")
+good = open("positive-words.txt")
+negate = open("Negations.txt")
+bad_words = [x.lower() for x in list(bad.read().split())]
+good_words = [x.lower() for x in list(good.read().split())]
+negations = [x.lower() for x in list(negate.read().split())]
+FR = folder_reader([],good_words,bad_words,negations)
 FR.read_folder()
