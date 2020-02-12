@@ -132,11 +132,11 @@ class folder_reader:
                 wrds += len(line)
 
             #print all features to see data (remove after testing)
-            print(pos)
+            """print(pos)
             print(neg)
             print(exc)
             print(wrds)
-            print("-----")
+            print("-----")"""
             r = review(pos,neg,exc,wrds)
             self.reviews.append(r)
 
@@ -144,3 +144,10 @@ negate = open("Negations.txt")
 negations = [x.lower() for x in list(negate.read().split())]
 FR = folder_reader([],negations)
 FR.read_folder()
+#testing word sentiment count(delete after testing)
+neg_wrds, pos_wrds = 0,0
+for r in FR.reviews:
+    neg_wrds += r.neg
+    pos_wrds += r.pos
+print("avg positive words: " + (str)(pos_wrds/len(FR.reviews)))
+print("avg negative words: " + (str)(neg_wrds/len(FR.reviews)))
