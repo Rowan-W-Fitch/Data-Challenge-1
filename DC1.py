@@ -103,10 +103,7 @@ class folder_reader:
         path = input('enter path:')+'/*.txt'
         for file in glob.glob(path):
             #initializing review features
-            pos = 0
-            neg = 0
-            exc = False
-            wrds = 0
+            pos, neg, exc, wrds = 0, 0, False, 0
             #open file
             f = open(file)
             for line in f:
