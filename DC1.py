@@ -4,9 +4,6 @@ import string
 import re
 import nltk
 from nltk.corpus import sentiwordnet as swn
-from nltk.corpus import wordnet as wn
-from nltk.stem import WordNetLemmatizer
-from nltk.stem import PorterStemmer
 
 """
 review class acts as a node, holds all data
@@ -63,8 +60,6 @@ class folder_reader:
             return "v"
         return None
 
-    lemmatizer = WordNetLemmatizer()
-
     def get_sentiment(word,tag):
         tag = self.convert_pos(tag)
         sentis = swn.senti_synsets(word, tag)[0]
@@ -79,11 +74,13 @@ class folder_reader:
             neg = 0
             exc = False
             wrds = 0
-            #search for exclamation pts
+
             f = open(file)
             for line in f:
+                #look for exclamation pt
                 if exclamation in line:
                     exc = True
+                #get negative an positive sentiment values
                 token = nltk.word_tokenize(line)
                 tagged = nltk.pos_tag(token)
                 for x,y in tagged:
@@ -97,6 +94,7 @@ class folder_reader:
                         print(sent[1])
                         pos += sent[0]
                         neg += sent[1]
+                #get length of sentence
                 line = re.sub(r'[^\w\s]','',line)
                 wrds += len(line)
 
