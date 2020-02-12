@@ -1,6 +1,12 @@
 import math
 import glob
 import string
+import re
+import nltk
+from nltk.corpus import sentiwordnet as swn
+from nltk.corpus import wordnet as wn
+from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 
 """
 review class acts as a node, holds all data
@@ -46,20 +52,59 @@ class folder_reader:
         rev = review(p,n,e,w)
         return rev
 
+    def convert_pos(tag):
+        if tag.startswith('J'):
+            return "a"
+        elif tag.startswith('N'):
+            return "n"
+        elif tag.startswith('R'):
+            return "r"
+        elif tag.startswith('V'):
+            return "v"
+        return None
+
+    lemmatizer = WordNetLemmatizer()
+
+    def get_sentiment(word,tag):
+        tag = self.convert_pos(tag)
+        sentis = swn.senti_synsets(word, tag)[0]
+        return [sentis.pos_score(),sentis.neg_score()]
+
     def read_folder(self):
         exclamation = string.punctuation[0]
         path = input('enter path:')+'/*.txt'
         for file in glob.glob(path):
             #initializing review features
-            pos = []
-            neg = []
+            pos = 0
+            neg = 0
             exc = False
             wrds = 0
             #search for exclamation pts
-            f = open(file, 'rU')
+            f = open(file)
             for line in f:
                 if exclamation in line:
                     exc = True
+                token = nltk.word_tokenize(line)
+                tagged = nltk.pos_tag(token)
+                for x,y in tagged:
+                    print(x)
+                    print(y)
+                    print("------")
+                senti_val = [self.get_sentiment(x,y) for x,y in tagged]
+                for sent in senti_val:
+                    if len(sent) > 0:
+                        print(sent[0])
+                        print(sent[1])
+                        pos += sent[0]
+                        neg += sent[1]
+                line = re.sub(r'[^\w\s]','',line)
+                wrds += len(line)
+
+            print(pos)
+            print(neg)
+            print(exc)
+            print(wrds)
+
 
 
 
