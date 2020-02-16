@@ -60,8 +60,27 @@ for file in files:
 """ Following code is for flagging potential fake reviews"""
 source1 = pos_revs
 source2 = neg_reviews
-ratings = r"C:\Users\Rowan Fitch\Desktop\NLP\Data\DC1\ratings\unlabeled"
+ratings = r"C:\Users\Rowan Fitch\Desktop\NLP\Data\DC1\ratings\unlabeled.txt"
 fakes = r"C:\Users\Rowan Fitch\Desktop\NLP\Data\DC1\fakes"
+rate = open(ratings)
+rate_nums = list(enumerate(rate))
 
 for files in os.listdir(source1):
-    print(files[len(files)-4])
+    idx1 = files.find("_")
+    idx2 = files.find(".")
+    file_num = files[idx1+1:idx2]
+    rating = rate_nums[int(file_num) -1][1]
+    idx3 = rating.find(" ")
+    if float(rating[idx3+1:len(rating)]) < 3.0:
+        shutil.copy2(os.path.join(source1,files),fakes)
+
+for files in os.listdir(source2):
+    idx1 = files.find("_")
+    idx2 = files.find(".")
+    file_num = files[idx1+1:idx2]
+    rating = rate_nums[int(file_num) -1][1]
+    idx3 = rating.find(" ")
+    if float(rating[idx3+1:len(rating)]) > 3.0:
+        shutil.copy2(os.path.join(source2,files),fakes)
+
+print("done")
